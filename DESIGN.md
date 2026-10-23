@@ -4,7 +4,7 @@ How Astrolabe's surfaces (the landing page in `site/` and anything built next to
 
 ## Overview
 
-A calm daytime sky with precise instruments floating in it. Big airy blue hero, soft drifting clouds, frosted-glass cards that show real product output, then clean white sections with a bento grid. Technical, honest and a little playful. One electric accent (lime) against sky blue and near-black ink.
+A calm daytime sky with precise instruments floating in it. The motif is the astrolabe itself, a dial for reading the sky: split-flap readouts, a radar sweep behind the scan, and a line-art dial with crosshairs and an off-center rete. Big airy blue hero, soft drifting clouds, frosted-glass cards that show real product output, then clean white sections with a bento grid. Technical, honest and a little playful. One electric accent (lime) against sky blue and near-black ink.
 
 The product checks design-token fidelity, so the site must itself be 100% on-token. Never show fake stats, testimonials or client logos; every number on the page is real CLI output or a true fact about the tool.
 
@@ -105,6 +105,13 @@ A fixed pill that is transparent over the hero and turns to `glass-strong` once 
 - **Matcher playground**: real OKLab ΔE and px matching, printing the exact CLI line.
 - **Terminal**: types the real demo command and prints its real output.
 - **Counter**: odometer digits on a spring.
+- **Split-flap readout**: an ink tile board at the foot of the hero cycling real facts (React Bits SplitFlapText, on tokens).
+- **Scroll-lit statement**: the problem heading's words brighten from faint to ink as they cross the reading line.
+- **Radar sweep**: a light-mode sky-blue radar behind the scan demo (React Bits Radar), decorative and paused with the rest of the motion.
+- **Dial**: the logo inside a slowly turning astrolabe ring with 72 ticks, crosshairs, an off-center rete, star points and circular lettering.
+
+### Section heads
+The hero and the problem statement are centered. Every other section uses a split head: eyebrow and heading on the left, one sentence of context on the right, stacking under 860px.
 
 ## Do's and Don'ts
 

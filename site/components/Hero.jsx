@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import Clouds from "./Clouds";
 import Ring from "./Ring";
+import SplitFlapText from "./SplitFlapText";
 import TiltCard from "./TiltCard";
 import { Arrow, Icon } from "./Icons";
 import { finePointer, prefersReduced } from "../lib/hooks";
@@ -17,6 +18,9 @@ const BARS = [
   ["family", 83, true],
   ["weight", 89, true],
 ];
+// Real facts about the tool, shown on the split-flap board at the bottom of the hero.
+const FACTS = ["OPEN SOURCE", "MIT LICENSE", "NO ACCOUNT", "1 DEPENDENCY", "6 PROPERTIES"];
+
 const PR_ROWS = [
   ["🟡 color", "#3b82f7"],
   ["🟡 spacing", "13px"],
@@ -242,14 +246,20 @@ export default function Hero() {
       </div>
 
       <div className="hero-foot">
-        Open source · MIT · No account, no AI, no server
-        <div className="dots" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
+        <SplitFlapText
+          words={FACTS}
+          padTo={12}
+          align="center"
+          fontSize={20}
+          tileColor="var(--ink-2)"
+          textColor="var(--paper)"
+          tileRadius={6}
+          gap={4}
+          cycleDelay={2600}
+          glare={0.6}
+          depth={0.55}
+          order="center"
+        />
       </div>
     </section>
   );

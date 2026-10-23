@@ -1,6 +1,6 @@
 # Third-party notices
 
-Parts of the interactive effects on this page (the cursor-following card glow, rolling number counters and tilting cards) are adapted from React Bits components: Magic Bento, Counter and Tilted Card. They are adapted for this page in site/components/Counter.jsx, MagicGrid.jsx and TiltCard.jsx, and those files are covered by the React Bits license below, not by the MIT license of the rest of this repository.
+Parts of the interactive effects on this page are adapted from React Bits components: Magic Bento, Counter and Tilted Card (in site/components/MagicGrid.jsx, Counter.jsx and TiltCard.jsx), plus SplitFlapText and Radar (in site/components/SplitFlapText.jsx and Radar.jsx, used nearly as published, with styles moved to app/globals.css). Those files are covered by the React Bits license below, not by the MIT license of the rest of this repository.
 
 Source: https://github.com/DavidHDev/react-bits
 
