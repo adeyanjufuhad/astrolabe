@@ -43,7 +43,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 96px; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 96px; scroll-padding-bottom: 72px; -webkit-text-size-adjust: 100%; }
 a, button, input, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0; background-color: var(--paper); color: var(--ink);
@@ -903,8 +903,8 @@ footer { padding-block: var(--s11) var(--s13); }
 
 /* How it works: radar sweep behind the scan demo */
 .how { overflow: hidden; isolation: isolate; }
-.radar-bg { position: absolute; z-index: -1; top: 50%; right: -8%; width: 820px; height: 820px; translate: 0 -40%; pointer-events: none;
-  -webkit-mask-image: radial-gradient(closest-side, #000 60%, transparent); mask-image: radial-gradient(closest-side, #000 60%, transparent); }
+.radar-bg { position: absolute; z-index: -1; top: 50%; right: -14%; width: 1000px; height: 1000px; translate: 0 -44%; pointer-events: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent); mask-image: radial-gradient(closest-side, #000 72%, transparent); }
 
 /* Closing dial: the logo inside a slowly turning astrolabe ring */
 .dial { position: relative; width: 220px; height: 220px; margin: 0 auto; color: var(--paper); }
@@ -955,7 +955,9 @@ html[data-motion="paused"] :is(.strip, .bob, .marquee-track, .cursor, .dial-ring
   .try { grid-template-columns: minmax(0, 1fr); }
   .section-head.split { grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
   .section-head.split p { justify-self: start; }
-  .radar-bg { right: 50%; translate: 50% -30%; width: 560px; height: 560px; }
+  .radar-bg { top: 0; right: 50%; translate: 50% -8%; width: 640px; height: 640px; }
+  .motion-toggle { padding: var(--s3); }
+  .motion-toggle .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 @media (max-width: 760px) {
   .container { padding-inline: var(--s5); }

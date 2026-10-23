@@ -9,7 +9,7 @@ export default function RadarBackdrop() {
   return (
     <div className="radar-bg" aria-hidden="true">
       <Radar
-        color="#3a8cf0"
+        color="#1462d6"
         lightMode
         speed={0.5}
         scale={0.92}
@@ -17,9 +17,10 @@ export default function RadarBackdrop() {
         spokeCount={12}
         targets={4}
         clutter={0.15}
-        glow={0.6}
+        glow={0.9}
+        lineWidth={1.4}
         grain={0}
-        opacity={0.55}
+        opacity={1}
         mouseInteraction={false}
         paused={paused}
       />

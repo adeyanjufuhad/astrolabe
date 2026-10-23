@@ -30,7 +30,7 @@ export default function MotionToggle() {
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         {paused ? <path d="M7 4.5v15l13-7.5z" /> : <path d="M6 4h4v16H6zM14 4h4v16h-4z" />}
       </svg>
-      {paused ? "Play motion" : "Pause motion"}
+      <span className="label">{paused ? "Play motion" : "Pause motion"}</span>
     </button>
   );
 }
