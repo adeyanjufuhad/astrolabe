@@ -1,0 +1,115 @@
+name: Astrolabe design drift check
+description: Audit pages against your design tokens and comment the results on the pull request.
+author: adeyanjufuhad
+branding:
+  icon: compass
+  color: green
+
+inputs:
+  urls:
+    description: Pages to audit (URLs or HTML files), separated by spaces or new lines.
+    required: true
+  tokens:
+    description: Path to your design token JSON file.
+    default: tokens.json
+  fail-under:
+    description: Fail the job if fidelity (percent of values on-token) is below this. 0 never fails.
+    default: "0"
+  ignore:
+    description: Comma-separated CSS selectors to skip (e.g. ".ads,#cookie-banner").
+    default: ""
+  viewport:
+    description: Viewport size WIDTHxHEIGHT.
+    default: 1280x800
+  comment:
+    description: Post (and keep updating) a summary comment on the pull request.
+    default: "true"
+  server:
+    description: Optional Astrolabe server URL to store scan history in.
+    default: ""
+  api-key:
+    description: API key for the history server (use a secret).
+    default: ""
+  project:
+    description: Project name for the history server. Defaults to the repository name.
+    default: ""
+  github-token:
+    description: Token used to comment on the pull request.
+    default: ${{ github.token }}
+
+outputs:
+  score:
+    description: Overall fidelity percentage.
+    value: ${{ steps.check.outputs.score }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: "1.24"
+        cache: false
+
+    - name: Build Astrolabe
+      shell: bash
+      run: cd "$GITHUB_ACTION_PATH" && go build -trimpath -o "$RUNNER_TEMP/astrolabe" ./cmd/astrolabe
+
+    - name: Check pages
+      id: check
+      shell: bash
+      env:
+        INPUT_URLS: ${{ inputs.urls }}
+        INPUT_TOKENS: ${{ inputs.tokens }}
+        INPUT_FAIL_UNDER: ${{ inputs.fail-under }}
+        INPUT_IGNORE: ${{ inputs.ignore }}
+        INPUT_VIEWPORT: ${{ inputs.viewport }}
+        INPUT_SERVER: ${{ inputs.server }}
+        INPUT_PROJECT: ${{ inputs.project }}
+        ASTROLABE_API_KEY: ${{ inputs.api-key }}
+      run: |
+        set +e
+        read -ra URLS <<< "$(printf '%s' "$INPUT_URLS" | tr '\n' ' ')"
+        out="$RUNNER_TEMP/astrolabe"
+        args=(check "${URLS[@]}" --tokens "$INPUT_TOKENS" --viewport "$INPUT_VIEWPORT" --fail-under "$INPUT_FAIL_UNDER"
+              --json "$out.json" --html "$out-report.html" --markdown "$out.md" --no-color)
+        [ -n "$INPUT_IGNORE" ] && args+=(--ignore "$INPUT_IGNORE")
+        [ -n "$INPUT_SERVER" ] && args+=(--upload "$INPUT_SERVER")
+        [ -n "$INPUT_PROJECT" ] && args+=(--project "$INPUT_PROJECT")
+        "$RUNNER_TEMP/astrolabe" "${args[@]}"
+        code=$?
+        [ -f "$out.md" ] && cat "$out.md" >> "$GITHUB_STEP_SUMMARY"
+        echo "score=$(jq -r '.score // empty' "$out.json" 2>/dev/null)" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        exit 0 # report first, enforce the threshold in the last step
+
+    - name: Upload HTML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: astrolabe-report
+        path: ${{ runner.temp }}/astrolabe-report.html
+        if-no-files-found: ignore
+
+    - name: Comment on pull request
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        body="$RUNNER_TEMP/astrolabe.md"
+        [ -f "$body" ] || exit 0
+        echo "" >> "$body"
+        echo "<sub>[Full HTML report](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (artifact: astrolabe-report)</sub>" >> "$body"
+        # Update our previous comment instead of adding a new one on every push.
+        id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+              --jq '.[] | select(.body | startswith("<!-- astrolabe-report -->")) | .id' | tail -n 1)
+        if [ -n "$id" ]; then
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@"$body" > /dev/null
+        else
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+        fi
+
+    - name: Enforce fidelity threshold
+      shell: bash
+      run: exit ${{ steps.check.outputs.exit-code }}

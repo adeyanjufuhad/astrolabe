@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Astrolabe report · {{pct .Score}}%</title>
+<style>
+:root {
+  --bg: #060914; --panel: #0d1324; --panel-2: #131b31; --line: #1f2a44;
+  --text: #e7ecf7; --muted: #8a96b3; --accent: #c8f560; --accent-ink: #0b1200;
+  --good: #7ee0a1; --ok: #f5c451; --bad: #ff7a85; --near: #f5c451; --off: #ff7a85;
+  --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: #f4f6fb; --panel: #ffffff; --panel-2: #f1f4fa; --line: #dfe5f0; --text: #0e1526; --muted: #5d6a86;
+          --accent: #5a7d00; --accent-ink: #fff; --good: #138a4a; --ok: #9a6b00; --bad: #c62839; --near: #9a6b00; --off: #c62839; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .55;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 12%, #fff6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 46%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 72%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 88%, #fff4 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 92%, #fff4 50%, transparent 51%),
+    radial-gradient(900px 500px at 85% -10%, #2a3d8f33, transparent 70%); }
+@media (prefers-color-scheme: light) { body::before { display: none; } }
+.wrap { position: relative; max-width: 1080px; margin: 0 auto; padding: 32px 20px 64px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; font-size: 18px; }
+.brand svg { color: var(--accent); }
+.meta { color: var(--muted); font: 12px/1.6 var(--mono); text-align: right; }
+.page { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-bottom: 28px; }
+.summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; padding: 28px; align-items: center; border-bottom: 1px solid var(--line); }
+.ring { position: relative; width: 112px; height: 112px; }
+.ring svg { transform: rotate(-90deg); }
+.ring .track { stroke: var(--line); }
+.ring .good { stroke: var(--good); } .ring .ok { stroke: var(--ok); } .ring .bad { stroke: var(--bad); }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 24px/1 var(--sans); letter-spacing: -.02em; }
+.ring b small { display: block; font: 500 10px/1 var(--mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 6px; text-align: center; }
+.url { font: 600 17px/1.3 var(--sans); word-break: break-all; margin: 0 0 4px; }
+.title { color: var(--muted); margin: 0 0 16px; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; }
+.stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font: 12px/1.6 var(--mono); color: var(--muted); }
+.stat b { color: var(--text); font-weight: 600; }
+.cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 20px 28px; border-bottom: 1px solid var(--line); }
+.cat { font: 12px/1.4 var(--mono); color: var(--muted); }
+.cat .bar { height: 4px; border-radius: 4px; background: var(--line); margin-top: 6px; overflow: hidden; }
+.cat .bar i { display: block; height: 100%; background: var(--accent); }
+.cat b { color: var(--text); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--line); }
+td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+.sev { display: inline-block; font: 600 11px/1 var(--mono); padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+.sev.near { color: var(--near); background: color-mix(in srgb, var(--near) 14%, transparent); }
+.sev.off { color: var(--off); background: color-mix(in srgb, var(--off) 14%, transparent); }
+.cat-name { display: block; font: 11px/1.6 var(--mono); color: var(--muted); margin-top: 4px; }
+.val { font: 600 14px/1.3 var(--mono); }
+.props { display: block; font: 11px/1.6 var(--mono); color: var(--muted); }
+.cmp { display: flex; align-items: center; gap: 8px; }
+.sw { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); flex: none;
+      background-image: linear-gradient(45deg, #8882 25%, transparent 25%, transparent 75%, #8882 75%), linear-gradient(45deg, #8882 25%, transparent 25%, transparent 75%, #8882 75%);
+      background-size: 8px 8px; background-position: 0 0, 4px 4px; position: relative; overflow: hidden; }
+.sw i { position: absolute; inset: 0; }
+.bars { display: grid; gap: 4px; }
+.bars span { display: block; height: 6px; border-radius: 3px; min-width: 2px; }
+.bars .is { background: var(--off); } .bars .want { background: var(--accent); }
+.arrow { color: var(--muted); }
+.tok { font: 13px/1.4 var(--mono); }
+.tok small { display: block; color: var(--muted); font-size: 11px; }
+.count { font: 600 13px var(--mono); }
+details summary { cursor: pointer; font: 12px/1.6 var(--mono); color: var(--muted); list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary code { color: var(--text); }
+details ul { margin: 6px 0 0; padding: 0; list-style: none; font: 12px/1.7 var(--mono); }
+.empty { padding: 36px 28px; text-align: center; color: var(--good); font-weight: 500; }
+footer { color: var(--muted); font: 12px/1.6 var(--mono); text-align: center; margin-top: 12px; }
+footer a { color: inherit; }
+@media (max-width: 720px) {
+  .summary { grid-template-columns: 1fr; }
+  thead { display: none; }
+  tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  td { padding: 0; border: 0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="16" cy="16" r="13"/><ellipse cx="16" cy="16" rx="13" ry="5" transform="rotate(-30 16 16)"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/>
+      </svg>
+      Astrolabe
+    </div>
+    <div class="meta">
+      {{.GeneratedAt.Format "2006-01-02 15:04 UTC"}} · v{{.Version}}<br>
+      tokens: {{.TokensFile}}{{if .GitSHA}} · {{.GitSHA}}{{end}}
+    </div>
+  </header>
+
+  {{range .Pages}}
+  {{$p := .}}
+  <section class="page">
+    <div class="summary">
+      <div class="ring">
+        <svg width="112" height="112" viewBox="0 0 112 112">
+          <circle class="track" cx="56" cy="56" r="44" fill="none" stroke-width="10"/>
+          <circle class="{{grade .Score}}" cx="56" cy="56" r="44" fill="none" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="276.5" stroke-dashoffset="{{ring .Score}}"/>
+        </svg>
+        <b><span>{{pct .Score}}%<small>fidelity</small></span></b>
+      </div>
+      <div>
+        <p class="url">{{.URL}}</p>
+        <p class="title">{{if .Title}}{{.Title}}{{else}}Untitled page{{end}}</p>
+        <div class="stats">
+          <span class="stat"><b>{{.Matched}}</b> / {{.Checked}} values on-token</span>
+          <span class="stat"><b>{{countSev .Findings "near-miss"}}</b> near-misses</span>
+          <span class="stat"><b>{{countSev .Findings "off-system"}}</b> off-system</span>
+          <span class="stat"><b>{{.Elements}}</b> elements</span>
+        </div>
+      </div>
+    </div>
+    <div class="cats">
+      {{range categories $p}}
+      <div class="cat"><b>{{.Name}}</b> · {{pct .Score}}%<div class="bar"><i style="width: {{pct .Score}}%"></i></div></div>
+      {{end}}
+    </div>
+    {{if .Findings}}
+    <table>
+      <thead><tr><th>Severity</th><th>Found</th><th>Visual</th><th>Used</th><th>Nearest token</th><th>Where</th></tr></thead>
+      <tbody>
+      {{range .Findings}}
+      <tr>
+        <td>{{if nearMiss .Severity}}<span class="sev near">near-miss</span>{{else}}<span class="sev off">off-system</span>{{end}}<span class="cat-name">{{.Category}}</span></td>
+        <td><span class="val">{{.Value}}</span><span class="props">{{join .Properties ", "}}</span></td>
+        <td>
+          {{if isColor .Category}}
+            <div class="cmp"><span class="sw"><i style="background: {{css .Value}}"></i></span>{{if .Nearest}}<span class="arrow">→</span><span class="sw"><i style="background: {{css .Nearest.Value}}"></i></span>{{end}}</div>
+          {{else if isLength .Category}}
+            <div class="bars"><span class="is" style="width: {{barWidth .Value}}"></span>{{if .Nearest}}<span class="want" style="width: {{barWidth .Nearest.Value}}"></span>{{end}}</div>
+          {{end}}
+        </td>
+        <td><span class="count">×{{.Occurrences}}</span></td>
+        <td>{{if .Nearest}}<span class="tok">{{.Nearest.Token}}<small>{{.Nearest.Value}}{{with dist .}} · {{.}}{{end}}</small></span>{{else}}—{{end}}</td>
+        <td>
+          <details>
+            <summary><code>{{index .Selectors 0}}</code>{{if gt .Occurrences 1}} +{{more .}}{{end}}</summary>
+            <ul>{{range .Selectors}}<li>{{.}}</li>{{end}}</ul>
+          </details>
+        </td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <div class="empty">✓ Everything on this page matches your design tokens.</div>
+    {{end}}
+  </section>
+  {{end}}
+
+  <footer>Generated by <a href="https://github.com/adeyanjufuhad/astrolabe">Astrolabe</a>. Open source design-to-code drift detection.</footer>
+</div>
+</body>
+</html>

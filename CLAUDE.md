@@ -1,0 +1,65 @@
+# Astrolabe: context for Claude Code
+
+Astrolabe is an open-source CLI (Go) that opens real pages in a headless browser, reads the computed styles, and flags every color, spacing, radius, font size, font family and font weight that isn't one of the team's design tokens. It suggests the nearest token for each, and it runs as a GitHub Action that comments on PRs. An optional server stores scan history in Neon Postgres.
+
+Owner: Adeyanju Fuhad (github.com/adeyanjufuhad). Working name "Astrolabe". Check the name is free on GitHub, npm and domains before launch.
+
+## Hard rules
+
+- **Never add a `Co-authored-by: Claude` (or any Claude attribution) line to commits or PRs.** Commits are authored by the owner.
+- **Zero cost.** No paid APIs, hosting or services. Free tiers only, and the product must work with no AI and no server at all.
+- **Low data use.** The owner works on about 5GB of mobile data. Don't download big things (Docker images, Playwright browser bundles, local LLM weights) without asking. The CLI uses the Chrome or Edge already installed on the machine, and Edge ships with Windows.
+- **Stdlib first.** The only dependency is `github.com/lib/pq` (Postgres driver, zero transitive deps). The browser client (`internal/browser`) is a hand-written DevTools/WebSocket client on purpose: a single small binary with nothing to audit. Don't swap in chromedp or Playwright.
+- Go 1.24. Keep `go.mod` free of `replace` directives, or `go install ...@latest` breaks.
+
+## First steps on this machine
+
+0. If `ci.yml` is sitting in the project root, move it to `.github/workflows/ci.yml` (it couldn't be written there directly), then delete the root copy.
+1. `go test ./...` should pass. The extract test is skipped if no Chrome or Edge is found.
+2. Create the GitHub repo if it doesn't exist yet: public, named `astrolabe`, under `adeyanjufuhad`. Then `git init` (if needed), commit, and push `main`. Follow the no-co-author rule.
+3. Try it: `go run ./cmd/astrolabe check examples/checkout/index.html --tokens examples/checkout/tokens.json --html report.html`
+
+## Layout
+
+```
+cmd/astrolabe/            CLI: check, tokens, version
+cmd/astrolabe-server/     HTTP API storing scan history (Neon). Optional.
+internal/browser/         minimal Chrome DevTools client (ws.go = RFC 6455 client, find.go = locate Chrome/Edge/Brave)
+internal/extract/         collect.js runs in the page; returns computed styles of visible elements
+internal/tokens/          token loader: W3C DTCG, Tokens Studio, plain nested JSON; aliases; categorization
+internal/colorx/          CSS color parsing (hex, rgb, hsl, oklch, oklab, color(srgb)) + OKLab ΔE
+internal/drift/           matching + findings (near-miss vs off-system) + fidelity score
+internal/report/          text, JSON, Markdown (PR comment), self-contained HTML report
+internal/store/           Postgres store + schema.sql
+examples/checkout/        demo page with planted drift + its tokens.json
+action.yml                composite GitHub Action (builds the CLI, comments on PR, uploads HTML artifact)
+```
+
+## How matching works
+
+- Colors match only if identical at 8 bits per channel. Off-token colors within ΔE 2 (OKLab ×100) are **near-misses** (e.g. `#3b82f7` vs token `#3b82f6`). Anything further is **off-system**.
+- Lengths match within 0.5px. Off-token values within 2px are near-misses.
+- Negative margins use the same scale. `margin: auto` is skipped (detected via `computedStyleMap()`). Radii ≥ 500px are treated as pills.
+- Typography (color, font-*) is audited only on elements with their own text.
+- A category is audited only if the token file defines tokens for it.
+- Occurrences count elements, not properties.
+
+## Neon
+
+- Project **astrolabe**, id `summer-unit-21841530`, region aws-eu-central-1, Postgres 18. Tables (projects, scans, findings) are already created from `internal/store/schema.sql`. The server also runs migrations on start.
+- Connection string: Neon console → astrolabe → Connect. Put it in `.env` (git-ignored) as `DATABASE_URL`. Use `sslmode=require` and drop `channel_binding=require`, which lib/pq doesn't support.
+- Run locally: `DATABASE_URL=... ASTROLABE_API_KEY=... go run ./cmd/astrolabe-server`, then `astrolabe check <url> --upload http://localhost:8080 --api-key ...`
+- API: `POST /api/scans?project=NAME` (Bearer key), `GET /api/projects`, `GET /api/projects/{name}/scans` (encode `/` as `%2F`), `GET /api/scans/{id}`, `GET /healthz`.
+
+## Status (Oct 2026)
+
+Done and tested: token loader, color math, browser client, extractor, drift engine, all four report formats, CLI, server with handler tests. The full CLI → server → Postgres round trip was verified against a local Postgres 16, and the queries were verified on Neon. CI workflow and composite Action are written but **not yet run on GitHub**. Watch the first CI run.
+
+## Next up (owner's call on order)
+
+1. Push to GitHub and get CI green. Tag `v0.1.0`.
+2. Landing page. Inspiration: an airy sky hero with drifting clouds, a row of floating glass cards showing product output (fidelity score, token diff, PR comment, `npx`/install command), a lime accent, small monospace nav, and a bento feature grid. **Open question: daytime sky (as in the reference) or a night/astral version of the same layout?** Ask before building. Animate clouds with layered WebP + CSS transforms (cheap), respect `prefers-reduced-motion`, and pause when off-screen. Use no fake stats, testimonials or client logos. Host free on Vercel or GitHub Pages.
+3. Release binaries (GoReleaser via GitHub Actions, free) so people can install without Go.
+4. Optional AI "suggest the fix" step: provider-agnostic, OpenAI-compatible adapter (Groq free tier, OpenRouter `:free`, or local Ollama), bring-your-own key, off by default. The core stays deterministic.
+5. Figma: the Variables REST API is Enterprise-only, so read tokens from file nodes/styles instead, or tell users to export DTCG JSON.
+6. Deploy the history server free (e.g. Render or Koyeb free tier) and build a small history dashboard.

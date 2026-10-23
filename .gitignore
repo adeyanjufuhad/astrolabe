@@ -1,0 +1,16 @@
+# Binaries
+/astrolabe
+/astrolabe-server
+*.exe
+/dist/
+
+# Reports generated while trying things out
+astrolabe-report.html
+report.html
+report.json
+report.md
+
+# Secrets
+.env
+.env.*
+!.env.example
