@@ -1,14 +1,17 @@
 import Clouds from "../components/Clouds";
 import CopyButton from "../components/CopyButton";
 import Counter from "../components/Counter";
+import Dial from "../components/Dial";
 import Hero from "../components/Hero";
 import MotionToggle from "../components/MotionToggle";
 import MagicGrid from "../components/MagicGrid";
 import Nav from "../components/Nav";
 import PauseOffscreen from "../components/PauseOffscreen";
+import RadarBackdrop from "../components/RadarBackdrop";
 import Reveal from "../components/Reveal";
 import Ring from "../components/Ring";
 import ScanDemo from "../components/ScanDemo";
+import ScrollWords from "../components/ScrollWords";
 import Terminal from "../components/Terminal";
 import TryIt from "../components/TryIt";
 import { Arrow, Icon, Logo } from "../components/Icons";
@@ -56,7 +59,17 @@ function MarqueeItems({ dup }) {
 
 const Edge = () => <span className="mb-edge" aria-hidden="true" />;
 
-function Head({ eyebrow, children, sub, style }) {
+function Head({ eyebrow, children, sub, style, split = false }) {
+  if (split)
+    return (
+      <Reveal className="section-head split" style={style}>
+        <div>
+          <span className="eyebrow">{eyebrow}</span>
+          <h2>{children}</h2>
+        </div>
+        {sub && <p>{sub}</p>}
+      </Reveal>
+    );
   return (
     <Reveal className="section-head" style={style}>
       <span className="eyebrow">{eyebrow}</span>
@@ -101,21 +114,24 @@ export default function Page() {
         {/* ======================= PROBLEM ======================= */}
         <section className="section" id="why">
           <div className="container">
-            <Head eyebrow="The problem">
-              Design tokens are a promise. Shipped CSS{" "}
-              <span className="chip-inline blue demo" aria-hidden="true">
-                <i style={{ backgroundColor: "#3b82f6" }} />
-                <i style={{ backgroundColor: "#3b82f7" }} />
-              </span>{" "}
-              breaks it{" "}
-              <span className="h-soft">
-                quietly, one{" "}
-                <span className="chip-inline lime" aria-hidden="true">
-                  <Logo size={18} />
-                </span>{" "}
-                value at a time.
-              </span>
-            </Head>
+            <Reveal className="section-head">
+              <span className="eyebrow">The problem</span>
+              <ScrollWords
+                parts={[
+                  "Design tokens are a promise. Shipped CSS",
+                  <span className="chip-inline blue demo" aria-hidden="true">
+                    <i style={{ backgroundColor: "#3b82f6" }} />
+                    <i style={{ backgroundColor: "#3b82f7" }} />
+                  </span>,
+                  "breaks it",
+                  { soft: "quietly, one" },
+                  <span className="chip-inline lime" aria-hidden="true">
+                    <Logo size={18} />
+                  </span>,
+                  { soft: "value at a time." },
+                ]}
+              />
+            </Reveal>
 
             <MagicGrid className="bento">
               <Reveal as="article" className="b-card b-sky mb">
@@ -200,9 +216,14 @@ export default function Page() {
         </section>
 
         {/* ======================= HOW IT WORKS ======================= */}
-        <section className="section how" id="how">
+        <section className="section how" id="how" data-pause>
+          <RadarBackdrop />
           <div className="container">
-            <Head eyebrow="How it works">
+            <Head
+              eyebrow="How it works"
+              split
+              sub="Astrolabe drives the browser you already have, so it checks exactly what your users see: the computed styles, not the source."
+            >
               Real browser. Real styles. <span className="h-soft">Every value checked.</span>
             </Head>
             <div className="how-grid">
@@ -214,7 +235,7 @@ export default function Page() {
         {/* ======================= TRY IT ======================= */}
         <section className="section" id="try">
           <div className="container">
-            <Head eyebrow="Try it" sub="The same matching rules as the CLI, running in your browser against the demo token set.">
+            <Head eyebrow="Try it" split sub="The same matching rules as the CLI, running in your browser against the demo token set.">
               Pick any value. <span className="h-soft">See what Astrolabe would say.</span>
             </Head>
             <TryIt />
@@ -224,7 +245,11 @@ export default function Page() {
         {/* ======================= FEATURES ======================= */}
         <section className="section" id="features" style={{ paddingTop: 0 }}>
           <div className="container">
-            <Head eyebrow="Features">
+            <Head
+              eyebrow="Features"
+              split
+              sub="One binary, four outputs: terminal, JSON, Markdown for pull requests and a self-contained HTML report."
+            >
               From your terminal <span className="h-soft">to every pull request</span>
             </Head>
 
@@ -393,7 +418,7 @@ export default function Page() {
         {/* ======================= GET STARTED ======================= */}
         <section className="section" id="start" style={{ paddingTop: 0 }}>
           <div className="container">
-            <Head eyebrow="Get started">
+            <Head eyebrow="Get started" split sub="Install it, point it at a page, then let the Action guard every pull request.">
               Three minutes <span className="h-soft">to your first score</span>
             </Head>
 
@@ -440,7 +465,7 @@ export default function Page() {
           <Clouds layer="mid" lazy />
           <Clouds layer="near" lazy />
           <Reveal>
-            <Logo className="mark" />
+            <Dial />
           </Reveal>
           <Reveal as="h2">
             Hold your UI to its tokens. <span className="soft">Every pixel, every pull request.</span>
