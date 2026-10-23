@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Astrolabe report · 94%</title>
+<style>
+:root {
+  --bg: #060914; --panel: #0d1324; --panel-2: #131b31; --line: #1f2a44;
+  --text: #e7ecf7; --muted: #8a96b3; --accent: #c8f560; --accent-ink: #0b1200;
+  --good: #7ee0a1; --ok: #f5c451; --bad: #ff7a85; --near: #f5c451; --off: #ff7a85;
+  --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: #f4f6fb; --panel: #ffffff; --panel-2: #f1f4fa; --line: #dfe5f0; --text: #0e1526; --muted: #5d6a86;
+          --accent: #5a7d00; --accent-ink: #fff; --good: #138a4a; --ok: #9a6b00; --bad: #c62839; --near: #9a6b00; --off: #c62839; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .55;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 12%, #fff6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 46%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 72%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 88%, #fff4 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 92%, #fff4 50%, transparent 51%),
+    radial-gradient(900px 500px at 85% -10%, #2a3d8f33, transparent 70%); }
+@media (prefers-color-scheme: light) { body::before { display: none; } }
+.wrap { position: relative; max-width: 1080px; margin: 0 auto; padding: 32px 20px 64px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; font-size: 18px; }
+.brand svg { color: var(--accent); }
+.meta { color: var(--muted); font: 12px/1.6 var(--mono); text-align: right; }
+.page { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-bottom: 28px; }
+.summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; padding: 28px; align-items: center; border-bottom: 1px solid var(--line); }
+.ring { position: relative; width: 112px; height: 112px; }
+.ring svg { transform: rotate(-90deg); }
+.ring .track { stroke: var(--line); }
+.ring .good { stroke: var(--good); } .ring .ok { stroke: var(--ok); } .ring .bad { stroke: var(--bad); }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 24px/1 var(--sans); letter-spacing: -.02em; }
+.ring b small { display: block; font: 500 10px/1 var(--mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 6px; text-align: center; }
+.url { font: 600 17px/1.3 var(--sans); word-break: break-all; margin: 0 0 4px; }
+.title { color: var(--muted); margin: 0 0 16px; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; }
+.stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font: 12px/1.6 var(--mono); color: var(--muted); }
+.stat b { color: var(--text); font-weight: 600; }
+.cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 20px 28px; border-bottom: 1px solid var(--line); }
+.cat { font: 12px/1.4 var(--mono); color: var(--muted); }
+.cat .bar { height: 4px; border-radius: 4px; background: var(--line); margin-top: 6px; overflow: hidden; }
+.cat .bar i { display: block; height: 100%; background: var(--accent); }
+.cat b { color: var(--text); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--line); }
+td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+.sev { display: inline-block; font: 600 11px/1 var(--mono); padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+.sev.near { color: var(--near); background: color-mix(in srgb, var(--near) 14%, transparent); }
+.sev.off { color: var(--off); background: color-mix(in srgb, var(--off) 14%, transparent); }
+.cat-name { display: block; font: 11px/1.6 var(--mono); color: var(--muted); margin-top: 4px; }
+.val { font: 600 14px/1.3 var(--mono); }
+.props { display: block; font: 11px/1.6 var(--mono); color: var(--muted); }
+.cmp { display: flex; align-items: center; gap: 8px; }
+.sw { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); flex: none;
+      background-image: linear-gradient(45deg, #8882 25%, transparent 25%, transparent 75%, #8882 75%), linear-gradient(45deg, #8882 25%, transparent 25%, transparent 75%, #8882 75%);
+      background-size: 8px 8px; background-position: 0 0, 4px 4px; position: relative; overflow: hidden; }
+.sw i { position: absolute; inset: 0; }
+.bars { display: grid; gap: 4px; }
+.bars span { display: block; height: 6px; border-radius: 3px; min-width: 2px; }
+.bars .is { background: var(--off); } .bars .want { background: var(--accent); }
+.arrow { color: var(--muted); }
+.tok { font: 13px/1.4 var(--mono); }
+.tok small { display: block; color: var(--muted); font-size: 11px; }
+.count { font: 600 13px var(--mono); }
+details summary { cursor: pointer; font: 12px/1.6 var(--mono); color: var(--muted); list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary code { color: var(--text); }
+details ul { margin: 6px 0 0; padding: 0; list-style: none; font: 12px/1.7 var(--mono); }
+.empty { padding: 36px 28px; text-align: center; color: var(--good); font-weight: 500; }
+footer { color: var(--muted); font: 12px/1.6 var(--mono); text-align: center; margin-top: 12px; }
+footer a { color: inherit; }
+@media (max-width: 720px) {
+  .summary { grid-template-columns: 1fr; }
+  thead { display: none; }
+  tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  td { padding: 0; border: 0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="16" cy="16" r="13"/><ellipse cx="16" cy="16" rx="13" ry="5" transform="rotate(-30 16 16)"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/>
+      </svg>
+      Astrolabe
+    </div>
+    <div class="meta">
+      2026-10-23 20:48 UTC · vdev<br>
+      tokens: examples/checkout/tokens.json
+    </div>
+  </header>
+
+  
+  
+  <section class="page">
+    <div class="summary">
+      <div class="ring">
+        <svg width="112" height="112" viewBox="0 0 112 112">
+          <circle class="track" cx="56" cy="56" r="44" fill="none" stroke-width="10"/>
+          <circle class="ok" cx="56" cy="56" r="44" fill="none" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="276.5" stroke-dashoffset="16.6"/>
+        </svg>
+        <b><span>94%<small>fidelity</small></span></b>
+      </div>
+      <div>
+        <p class="url">examples/checkout/index.html</p>
+        <p class="title">Checkout · Demo Shop</p>
+        <div class="stats">
+          <span class="stat"><b>189</b> / 201 values on-token</span>
+          <span class="stat"><b>4</b> near-misses</span>
+          <span class="stat"><b>3</b> off-system</span>
+          <span class="stat"><b>34</b> elements</span>
+        </div>
+      </div>
+    </div>
+    <div class="cats">
+      
+      <div class="cat"><b>color</b> · 96.1%<div class="bar"><i style="width: 96.1%"></i></div></div>
+      
+      <div class="cat"><b>spacing</b> · 93.8%<div class="bar"><i style="width: 93.8%"></i></div></div>
+      
+      <div class="cat"><b>radius</b> · 100%<div class="bar"><i style="width: 100%"></i></div></div>
+      
+      <div class="cat"><b>font-size</b> · 94.4%<div class="bar"><i style="width: 94.4%"></i></div></div>
+      
+      <div class="cat"><b>font-family</b> · 83.3%<div class="bar"><i style="width: 83.3%"></i></div></div>
+      
+      <div class="cat"><b>font-weight</b> · 88.9%<div class="bar"><i style="width: 88.9%"></i></div></div>
+      
+    </div>
+    
+    <table>
+      <thead><tr><th>Severity</th><th>Found</th><th>Visual</th><th>Used</th><th>Nearest token</th><th>Where</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><span class="sev near">near-miss</span><span class="cat-name">font-weight</span></td>
+        <td><span class="val">700</span><span class="props">font-weight</span></td>
+        <td>
+          
+        </td>
+        <td><span class="count">×2</span></td>
+        <td><span class="tok">font.weight.semibold<small>600 · 100 off</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary &gt; h2.line</code> +1</summary>
+            <ul><li>main.shell &gt; aside.card.order-summary &gt; h2.line</li><li>main.shell &gt; p.legal &gt; strong</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev near">near-miss</span><span class="cat-name">color</span></td>
+        <td><span class="val">#3b82f7</span><span class="props">background-color</span></td>
+        <td>
+          
+            <div class="cmp"><span class="sw"><i style="background: #3b82f7"></i></span><span class="arrow">→</span><span class="sw"><i style="background: #3b82f6"></i></span></div>
+          
+        </td>
+        <td><span class="count">×1</span></td>
+        <td><span class="tok">color.blue.500<small>#3b82f6 · ΔE 0.1</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary &gt; button.pay-button</code></summary>
+            <ul><li>main.shell &gt; aside.card.order-summary &gt; button.pay-button</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev near">near-miss</span><span class="cat-name">font-size</span></td>
+        <td><span class="val">15px</span><span class="props">font-size</span></td>
+        <td>
+          
+            <div class="bars"><span class="is" style="width: 45px"></span><span class="want" style="width: 48px"></span></div>
+          
+        </td>
+        <td><span class="count">×1</span></td>
+        <td><span class="tok">font.size.base<small>16px · 1px off</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary &gt; p.promo-note</code></summary>
+            <ul><li>main.shell &gt; aside.card.order-summary &gt; p.promo-note</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev near">near-miss</span><span class="cat-name">spacing</span></td>
+        <td><span class="val">13px</span><span class="props">padding</span></td>
+        <td>
+          
+            <div class="bars"><span class="is" style="width: 39px"></span><span class="want" style="width: 36px"></span></div>
+          
+        </td>
+        <td><span class="count">×1</span></td>
+        <td><span class="tok">space.3<small>12px · 1px off</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary</code></summary>
+            <ul><li>main.shell &gt; aside.card.order-summary</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev off">off-system</span><span class="cat-name">font-family</span></td>
+        <td><span class="val">georgia</span><span class="props">font-family</span></td>
+        <td>
+          
+        </td>
+        <td><span class="count">×2</span></td>
+        <td><span class="tok">font.family.sans<small>inter</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; p.legal</code> +1</summary>
+            <ul><li>main.shell &gt; p.legal</li><li>main.shell &gt; p.legal &gt; strong</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev off">off-system</span><span class="cat-name">color</span></td>
+        <td><span class="val">#ea580c</span><span class="props">color</span></td>
+        <td>
+          
+            <div class="cmp"><span class="sw"><i style="background: #ea580c"></i></span><span class="arrow">→</span><span class="sw"><i style="background: #6b7280"></i></span></div>
+          
+        </td>
+        <td><span class="count">×1</span></td>
+        <td><span class="tok">color.gray.500<small>#6b7280 · ΔE 23.2</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary &gt; p.promo-note</code></summary>
+            <ul><li>main.shell &gt; aside.card.order-summary &gt; p.promo-note</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="sev off">off-system</span><span class="cat-name">font-family</span></td>
+        <td><span class="val">arial</span><span class="props">font-family</span></td>
+        <td>
+          
+        </td>
+        <td><span class="count">×1</span></td>
+        <td><span class="tok">font.family.sans<small>inter</small></span></td>
+        <td>
+          <details>
+            <summary><code>main.shell &gt; aside.card.order-summary &gt; button.pay-button</code></summary>
+            <ul><li>main.shell &gt; aside.card.order-summary &gt; button.pay-button</li></ul>
+          </details>
+        </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    
+  </section>
+  
+
+  <footer>Generated by <a href="https://github.com/adeyanjufuhad/astrolabe">Astrolabe</a>. Open source design-to-code drift detection.</footer>
+</div>
+</body>
+</html>
