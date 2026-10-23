@@ -39,8 +39,8 @@ jobs:
           comment: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
       - run: echo "Demo fidelity ${{ steps.astrolabe.outputs.score }}%"
 
-  # The landing page is held to its own design tokens (site/tokens.json).
-  # .demo areas show drift on purpose, so they're skipped.
+  # The landing page (Next.js, static export) is built and then held to its own
+  # design tokens (site/tokens.json). .demo areas show drift on purpose, so they're skipped.
   site:
     runs-on: ubuntu-latest
     needs: test
@@ -49,9 +49,17 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build the landing page
+        working-directory: site
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
       - name: Serve the landing page
         run: |
-          python3 -m http.server 8765 --bind 127.0.0.1 --directory site > /dev/null 2>&1 &
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory site/out > /dev/null 2>&1 &
           for i in $(seq 20); do curl -sf http://127.0.0.1:8765/ > /dev/null && break; sleep 0.5; done
       - name: Check desktop
         run: go run ./cmd/astrolabe check http://127.0.0.1:8765/ --tokens site/tokens.json --ignore .demo --wait 1500ms --fail-under 100
