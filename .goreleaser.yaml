@@ -1,0 +1,40 @@
+# Prebuilt binaries for the Astrolabe CLI. .github/workflows/release.yml runs
+# this when a v* tag is pushed; CI builds a snapshot on every push and PR.
+version: 2
+
+project_name: astrolabe
+
+builds:
+  - id: astrolabe
+    main: ./cmd/astrolabe
+    binary: astrolabe
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Tag }}
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^Merge pull request"

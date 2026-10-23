@@ -22,6 +22,29 @@ jobs:
       - run: go test -race ./...
       - run: go build ./...
 
+  # Builds every release binary without publishing, so a broken .goreleaser.yaml
+  # fails here instead of on release day.
+  release-snapshot:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --snapshot --clean
+      - name: Smoke-test the Linux binary
+        run: |
+          bin=$(find dist -path '*linux_amd64*' -name astrolabe -type f | head -n 1)
+          "$bin" version
+          "$bin" version | grep -qv ' dev$' # the version must be stamped, not the "dev" default
+          ls dist/*.tar.gz dist/*.zip dist/checksums.txt
+
   # Runs the action from this repo against the demo page, which has drift on purpose.
   demo:
     runs-on: ubuntu-latest
