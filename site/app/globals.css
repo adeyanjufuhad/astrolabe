@@ -955,7 +955,7 @@ html[data-motion="paused"] :is(.strip, .bob, .marquee-track, .cursor, .dial-ring
   .try { grid-template-columns: minmax(0, 1fr); }
   .section-head.split { grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
   .section-head.split p { justify-self: start; }
-  .radar-bg { top: 0; right: 50%; translate: 50% -8%; width: 640px; height: 640px; }
+  .radar-bg { top: 0; right: 50%; translate: 50% -8%; width: 640px; height: 640px; opacity: .6; } /* sits behind body text here */
   .motion-toggle { padding: var(--s3); }
   .motion-toggle .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
