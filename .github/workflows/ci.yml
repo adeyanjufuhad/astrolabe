@@ -42,7 +42,7 @@ jobs:
         run: |
           bin=$(find dist -path '*linux_amd64*' -name astrolabe -type f | head -n 1)
           "$bin" version
-          "$bin" version | grep -qv ' dev$' # the version must be stamped, not the "dev" default
+          "$bin" version | grep -q -- '-next$' # stamped with the snapshot version, not "dev" or a released tag
           ls dist/*.tar.gz dist/*.zip dist/checksums.txt
 
   # Runs the action from this repo against the demo page, which has drift on purpose.

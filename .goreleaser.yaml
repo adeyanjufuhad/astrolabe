@@ -13,7 +13,8 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w -X main.version={{ .Tag }}
+      # Releases report their tag; snapshot builds report e.g. v0.1.1-next, never a released version.
+      - -s -w -X main.version={{ if .IsSnapshot }}v{{ .Version }}{{ else }}{{ .Tag }}{{ end }}
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
 
