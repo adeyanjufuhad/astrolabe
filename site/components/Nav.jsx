@@ -23,7 +23,7 @@ export default function Nav() {
   return (
     <header className={scrolled ? "nav scrolled" : "nav"}>
       <div className="nav-inner">
-        <a className="brand" href="#top" aria-label="Astrolabe home">
+        <a className="brand" href="#top" aria-label="Astrolabe home" translate="no">
           <Logo />
           Astrolabe
         </a>

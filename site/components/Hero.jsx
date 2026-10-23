@@ -157,7 +157,6 @@ export default function Hero() {
             <TiltCard className="glass">
               <div className="pill-head">
                 <span>Fidelity</span>
-                <span>↗</span>
               </div>
               <Ring value={94} delay={900} />
               <p className="k" style={{ textAlign: "center" }}>
@@ -189,7 +188,7 @@ export default function Hero() {
               <p className="k" style={{ marginTop: 4 }}>
                 any URL, localhost or HTML file
               </p>
-              <div className="term-mini">
+              <div className="term-mini" translate="no">
                 <span className="p">$</span> astrolabe check localhost:3000
               </div>
             </TiltCard>

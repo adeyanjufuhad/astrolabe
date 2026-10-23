@@ -2,6 +2,7 @@ import Clouds from "../components/Clouds";
 import CopyButton from "../components/CopyButton";
 import Counter from "../components/Counter";
 import Hero from "../components/Hero";
+import MotionToggle from "../components/MotionToggle";
 import MagicGrid from "../components/MagicGrid";
 import Nav from "../components/Nav";
 import PauseOffscreen from "../components/PauseOffscreen";
@@ -35,7 +36,7 @@ const YAML = `<span class="kk">on</span>: pull_request
     <span class="kk">runs-on</span>: ubuntu-latest
     <span class="kk">steps</span>:
       - <span class="kk">uses</span>: actions/checkout@v4
-      <span class="c"># ...start your app or wait for a preview deploy...</span>
+      <span class="c"># …start your app or wait for a preview deploy…</span>
       - <span class="kk">uses</span>: <span class="s">adeyanjufuhad/astrolabe@v0.1.0</span>
         <span class="kk">with</span>:
           <span class="kk">urls</span>: http://localhost:3000
@@ -83,6 +84,7 @@ export default function Page() {
     <>
       <PauseOffscreen />
       <Nav />
+      <MotionToggle />
       <main id="top">
         <Hero />
 
@@ -415,7 +417,7 @@ export default function Page() {
                 </CmdCard>
                 <CmdCard n="3" title="Guard every pull request" note="Add the Action. It comments the score and fails below your threshold.">
                   {/* Static, trusted snippet with syntax-highlight spans. */}
-                  <pre className="yaml" dangerouslySetInnerHTML={{ __html: YAML }} />
+                  <pre className="yaml" translate="no" dangerouslySetInnerHTML={{ __html: YAML }} />
                 </CmdCard>
               </div>
               <Terminal />
@@ -459,7 +461,7 @@ export default function Page() {
 
       <footer>
         <div className="container foot">
-          <a className="brand" href="#top">
+          <a className="brand" href="#top" translate="no">
             <Logo />
             Astrolabe
           </a>
