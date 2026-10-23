@@ -424,7 +424,19 @@ export default function Page() {
 
             <div className="start">
               <div className="start-steps">
-                <CmdCard n="1" title="Install" note="Needs Go 1.24 or newer. Prebuilt binaries are on the way.">
+                <CmdCard
+                  n="1"
+                  title="Install"
+                  note={
+                    <>
+                      Grab a{" "}
+                      <a href={`${REPO}/releases/latest`} style={{ textDecoration: "underline" }}>
+                        prebuilt binary
+                      </a>{" "}
+                      for Linux, macOS or Windows, or build it with Go 1.24 or newer.
+                    </>
+                  }
+                >
                   <div className="cmd">
                     <code>
                       <span className="p">$</span> {INSTALL}
@@ -451,7 +463,6 @@ export default function Page() {
             <Reveal className="section-head" style={{ marginTop: 96 }}>
               <span className="eyebrow">On the roadmap</span>
               <div className="roadmap">
-                <span>Prebuilt binaries</span>
                 <span>Opt-in AI fix suggestions, bring your own key</span>
                 <span>Figma token import</span>
                 <span>Hosted history dashboard</span>

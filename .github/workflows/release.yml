@@ -1,0 +1,27 @@
+name: Release
+
+# Pushing a tag like v0.1.1 builds the CLI for Linux, macOS and Windows and
+# publishes the archives and checksums as a GitHub Release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the changelog needs history back to the previous tag
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

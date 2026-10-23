@@ -29,6 +29,10 @@ Design tokens only help if the shipped UI uses them. Values get hard-coded under
 
 ## Install
 
+Download a prebuilt binary for Linux, macOS or Windows (amd64 and arm64) from the [latest release](https://github.com/adeyanjufuhad/astrolabe/releases/latest), unpack it, and put `astrolabe` on your `PATH`. Each release includes a `checksums.txt` to verify the download.
+
+Or build it with Go 1.24 or newer:
+
 ```bash
 go install github.com/adeyanjufuhad/astrolabe/cmd/astrolabe@latest
 ```
