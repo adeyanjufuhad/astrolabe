@@ -62,7 +62,7 @@ export default function Terminal() {
         <i />
         <span>~/shop</span>
       </div>
-      <pre ref={ref} aria-label="Example terminal session">
+      <pre ref={ref} aria-label="Example terminal session" translate="no">
         <Prompt /> {CMD.slice(0, typed)}
         {finished && "\n"}
         {OUT.slice(0, lines).map((line, i) => (

@@ -57,7 +57,7 @@ const pad = (s, n) => s + " ".repeat(Math.max(1, n - s.length));
 function CliLine({ sev, cat, value, rest }) {
   const near = sev === "near-miss";
   return (
-    <div className="cli-line">
+    <div className="cli-line" translate="no">
       {"  "}
       <span className={near ? "y" : "r"}>{near ? "near-miss " : "off-system"}</span>
       {"  " + pad(cat, 12) + " "}
@@ -190,7 +190,7 @@ export default function TryIt() {
           <label className="sr-only" htmlFor="hex">
             Hex color
           </label>
-          <input type="text" id="hex" value={hex} onChange={(e) => setHex(e.target.value)} spellCheck={false} autoComplete="off" />
+          <input type="text" id="hex" name="hex" value={hex} onChange={(e) => setHex(e.target.value)} spellCheck={false} autoComplete="off" />
           <label className="sr-only" htmlFor="color">
             Color picker
           </label>
@@ -213,7 +213,7 @@ export default function TryIt() {
           <label className="sr-only" htmlFor="px">
             Spacing in pixels
           </label>
-          <input type="range" id="px" min="0" max="56" step="0.5" value={px} onChange={(e) => setPx(parseFloat(e.target.value))} />
+          <input type="range" id="px" name="px" min="0" max="56" step="0.5" value={px} onChange={(e) => setPx(parseFloat(e.target.value))} />
           <div className="ruler">
             {RULER.map((n) => (
               <span key={n}>{n}</span>

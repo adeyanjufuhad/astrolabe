@@ -44,6 +44,17 @@ action.yml                composite GitHub Action (builds the CLI, comments on P
 - A category is audited only if the token file defines tokens for it.
 - Occurrences count elements, not properties.
 
+## Design skills (site/)
+
+`DESIGN.md` describes how Astrolabe's UI should look. Three project skills live in `.claude/skills/`: `web-interface-guidelines` (Vercel), `design-taste-frontend` and `redesign-existing-projects` (Taste Skill). Use them when building or reviewing anything in `site/`. Where they clash with this project, these rules win:
+
+- No Tailwind, Framer Motion, GSAP or icon packages. Use plain CSS in `site/app/globals.css`, the SVG sprite in `site/components/Icons.jsx`, and small React components. Ask before adding any npm package.
+- Fonts are Inter Tight and JetBrains Mono, pinned in `site/tokens.json`. Ignore the skills' Inter ban and font suggestions unless the owner changes the tokens.
+- The emoji in the PR-comment mock are Astrolabe's real output, so they stay.
+- No picsum or stock photos, fake numbers, testimonials or client logos, whatever the skills suggest about "organic data".
+- The centered hero with a fanned card row is the owner's chosen reference layout. Don't "fix" it into a split screen.
+- Every value must be a token. CI runs Astrolabe on the built page with `--fail-under 100`.
+
 ## Neon
 
 - Project **astrolabe**, id `summer-unit-21841530`, region aws-eu-central-1, Postgres 18. Tables (projects, scans, findings) are already created from `internal/store/schema.sql`. The server also runs migrations on start.
