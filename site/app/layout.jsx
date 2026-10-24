@@ -28,9 +28,10 @@ export default function RootLayout({ children }) {
         {/* Marks JS as available before first paint, so reveal and entrance styles apply without a flash. */}
         <script
           dangerouslySetInnerHTML={{
-            // Runs before first paint: enables reveal styles and restores a visitor's "pause motion" choice.
+            // Runs before first paint: enables reveal styles. It also clears the setting left by the
+            // pause-motion button that used to exist, so nobody stays stuck with frozen motion.
             __html:
-              "document.documentElement.classList.add('js');try{if(localStorage.getItem('astrolabe-motion')==='paused')document.documentElement.dataset.motion='paused'}catch(e){}",
+              "document.documentElement.classList.add('js');try{localStorage.removeItem('astrolabe-motion')}catch(e){}",
           }}
         />
         {/* Plain Google Fonts rather than next/font: next/font renames the families, and site/tokens.json

@@ -43,7 +43,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 96px; scroll-padding-bottom: 72px; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 96px; -webkit-text-size-adjust: 100%; }
 a, button, input, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0; background-color: var(--paper); color: var(--ink);
@@ -974,10 +974,6 @@ footer { padding-block: var(--s11) var(--s13); }
 
 /* motion control: paused while off-screen, off entirely for reduced motion */
 .offscreen .strip, .offscreen .marquee-track, .offscreen .dial-ring, .offscreen .carousel-ring { animation-play-state: paused; }
-html[data-motion="paused"] :is(.strip, .marquee-track, .cursor, .dial-ring, .carousel-ring) { animation-play-state: paused; }
-.motion-toggle { position: fixed; right: var(--s5); bottom: var(--s5); z-index: 40; display: inline-flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s4); border-radius: var(--r-pill); border: 1px solid var(--line); background-color: var(--glass-strong); color: var(--ink); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); font-family: var(--mono); font-size: var(--t-2xs); font-weight: 500; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 24px -16px rgba(10, 58, 140, .5); }
-.motion-toggle:hover { border-color: var(--ink); }
-@media (pointer: coarse) { .motion-toggle { min-height: 44px; } }
 /* 404 */
 .lost { min-height: 100dvh; display: grid; place-items: center; text-align: center; padding: var(--s7); }
 .lost .mark { width: 56px; height: 56px; margin: 0 auto; color: var(--sky-700); }
@@ -1019,8 +1015,6 @@ html[data-motion="paused"] :is(.strip, .marquee-track, .cursor, .dial-ring, .car
   .section-head.split { grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
   .section-head.split p { justify-self: start; }
   .radar-bg { top: 0; right: 50%; translate: 50% -8%; width: 640px; height: 640px; opacity: .6; } /* sits behind body text here */
-  .motion-toggle { padding: var(--s3); }
-  .motion-toggle .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 @media (max-width: 760px) {
   .carousel { --w: 140px; --h: 188px; --r: 504px; margin-top: var(--s9); perspective: 800px; }

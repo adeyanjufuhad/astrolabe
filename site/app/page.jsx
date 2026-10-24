@@ -4,7 +4,6 @@ import Counter from "../components/Counter";
 import Footer from "../components/Footer";
 import Dial from "../components/Dial";
 import Hero from "../components/Hero";
-import MotionToggle from "../components/MotionToggle";
 import MagicGrid from "../components/MagicGrid";
 import Nav from "../components/Nav";
 import PauseOffscreen from "../components/PauseOffscreen";
@@ -103,7 +102,6 @@ export default function Page() {
     <>
       <PauseOffscreen />
       <Nav />
-      <MotionToggle />
       <main id="top">
         <Hero />
 

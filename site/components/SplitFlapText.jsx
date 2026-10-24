@@ -2,7 +2,7 @@
 
 /* SplitFlapText from React Bits (reactbits.dev), used as part of this site.
    Copyright (c) 2026 David Haz. MIT + Commons Clause, see THIRD_PARTY_NOTICES.md.
-   Changes: styles live in app/globals.css on Astrolabe tokens; the cycle holds while the visitor has paused motion. */
+   Changes: styles live in app/globals.css on Astrolabe tokens. */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -283,7 +283,7 @@ const SplitFlapText = ({
       timer = window.setTimeout(() => {
         if (cancelled) return;
 
-        if (document.hidden || document.documentElement.dataset.motion === 'paused') {
+        if (document.hidden) {
           scheduleNext(timingRef.current.holdMs);
           return;
         }
