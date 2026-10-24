@@ -1,11 +1,9 @@
 "use client";
 
 import Radar from "./Radar";
-import { useMotionPaused } from "../lib/hooks";
 
 // A slow sky-blue radar sweep behind the scan demo. Decorative only.
 export default function RadarBackdrop() {
-  const paused = useMotionPaused();
   return (
     <div className="radar-bg" aria-hidden="true">
       <Radar
@@ -22,7 +20,6 @@ export default function RadarBackdrop() {
         grain={0}
         opacity={1}
         mouseInteraction={false}
-        paused={paused}
       />
     </div>
   );

@@ -38,13 +38,7 @@ export default function ScanDemo() {
   useEffect(() => {
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.35 });
     io.observe(browserRef.current);
-    // Resuming motion restarts the loop if it stopped while paused.
-    const onMotion = () => document.documentElement.dataset.motion !== "paused" && setRun((n) => n + 1);
-    window.addEventListener("motionchange", onMotion);
-    return () => {
-      io.disconnect();
-      window.removeEventListener("motionchange", onMotion);
-    };
+    return () => io.disconnect();
   }, []);
 
   useEffect(() => {
@@ -92,10 +86,7 @@ export default function ScanDemo() {
       setStep(3);
       setDone(true);
     }, START_MS + SCAN_MS + 200);
-    if (!prefersReduced())
-      later(() => {
-        if (document.documentElement.dataset.motion !== "paused") setRun((n) => n + 1);
-      }, START_MS + SCAN_MS + 4200);
+    if (!prefersReduced()) later(() => setRun((n) => n + 1), START_MS + SCAN_MS + 4200);
     return () => timers.forEach(clearTimeout);
   }, [visible, run]);
 
