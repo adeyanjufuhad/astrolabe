@@ -74,15 +74,19 @@ Run `astrolabe tokens tokens.json` to see how each token was understood. Colors 
 
 ```yaml
 # .github/workflows/design-drift.yml
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches: [main] # scans of main become the baseline for pull requests
 permissions:
   contents: read
   pull-requests: write
+  actions: read # lets the Action download main's report
 jobs:
   astrolabe:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # ...start your app or wait for a preview deployment...
       - uses: adeyanjufuhad/astrolabe@main
         with:
@@ -90,10 +94,30 @@ jobs:
             http://localhost:3000
             http://localhost:3000/checkout
           tokens: tokens.json
-          fail-under: 90
+          fail-on-new: true # block only drift this PR adds
 ```
 
-The Action posts one summary comment on the PR and updates it on every push. It also uploads the full HTML report as a build artifact and exposes the score as `steps.<id>.outputs.score`.
+The Action posts one summary comment on the PR and updates it on every push. It also uploads the HTML and JSON reports as a build artifact and exposes the score as `steps.<id>.outputs.score`.
+
+### Only the drift a pull request adds
+
+On a real codebase, the first scan usually finds plenty of drift that's been there for years. Flagging all of it on every PR turns the comment into noise. So when the workflow also runs on pushes to `main`, each PR is compared with `main`'s latest report (`baseline: auto`, the default):
+
+- The comment leads with what **this change** introduces: new off-token values, and existing ones now used on more elements.
+- Values the PR removed are listed as **fixed**.
+- Drift that was already on `main` is folded into a collapsed section.
+- `fail-on-new: true` fails the job only when the PR adds drift, so you can adopt Astrolabe without fixing the backlog first. `fail-under` still works alongside it.
+
+Until `main` has a report (for example, on the first PR), the Action lists everything and says so. Use `baseline: path/to/report.json` to compare with a specific report, or `baseline: none` to turn comparison off.
+
+The same works locally:
+
+```bash
+astrolabe check localhost:3000 --json before.json   # on main
+astrolabe check localhost:3000 --baseline before.json --fail-on-new   # on your branch
+```
+
+Pages are matched by URL path, so scans of two different preview deployments still line up.
 
 ## CLI reference
 
@@ -103,6 +127,8 @@ The Action posts one summary comment on the PR and updates it on every push. It 
 | `--format` | `text` | stdout format: `text`, `json`, `markdown`, `html` |
 | `--json`, `--html`, `--markdown` | | Also write that format to a file |
 | `--fail-under` | `0` | Exit 1 when fidelity is below this percentage |
+| `--baseline` | | Earlier JSON report to compare with: findings are marked new, increased, existing or fixed |
+| `--fail-on-new` | `false` | Exit 1 if a value is new or used more than in `--baseline` |
 | `--ignore` | | Comma-separated selectors to skip, e.g. `.ads,#cookie-banner` |
 | `--viewport` | `1280x800` | Viewport size |
 | `--wait` | `500ms` | Extra wait after load (for client-rendered content) |
@@ -111,7 +137,7 @@ The Action posts one summary comment on the PR and updates it on every push. It 
 | `--chrome` | auto | Browser binary |
 | `--upload`, `--project`, `--api-key` | | Send the scan to a history server |
 
-Exit codes are `0` for OK, `1` for below `--fail-under`, and `2` for errors.
+Exit codes are `0` for OK, `1` for below `--fail-under` or new drift with `--fail-on-new`, and `2` for errors.
 
 ## History server (optional)
 

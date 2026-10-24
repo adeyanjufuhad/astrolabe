@@ -2,7 +2,7 @@
 
 Astrolabe is an open-source CLI (Go) that opens real pages in a headless browser, reads the computed styles, and flags every color, spacing, radius, font size, font family and font weight that isn't one of the team's design tokens. It suggests the nearest token for each, and it runs as a GitHub Action that comments on PRs. An optional server stores scan history in Neon Postgres.
 
-Owner: Adeyanju Fuhad (github.com/adeyanjufuhad). Working name "Astrolabe". Check the name is free on GitHub, npm and domains before launch.
+Owner: Adeyanju Fuhad (github.com/adeyanjufuhad). Working name "Astrolabe". Name check (Oct 2026): no meaningful GitHub conflict; npm `astrolabe` is taken by an unrelated old package (`astrolabe-cli` is free); astrolabe.dev/.sh/.tools/.design are registered, while getastrolabe.dev, useastrolabe.dev and astrolabe.so looked free. Buying a domain costs money, so it is the owner's call.
 
 ## Hard rules
 
@@ -64,13 +64,19 @@ action.yml                composite GitHub Action (builds the CLI, comments on P
 
 ## Status (Oct 2026)
 
-Done and tested: token loader, color math, browser client, extractor, drift engine, all four report formats, CLI, server with handler tests. The full CLI → server → Postgres round trip was verified against a local Postgres 16, and the queries were verified on Neon. CI workflow and composite Action are written but **not yet run on GitHub**. Watch the first CI run.
+- **Live:** repo github.com/adeyanjufuhad/astrolabe (public); landing page https://astrolabe-pi.vercel.app (Vercel Hobby, project `astrolabe`, root `site/`, auto-deploys `main` and previews PRs); releases v0.1.0 and v0.1.1 (GoReleaser binaries for linux/darwin/windows × amd64/arm64 plus `checksums.txt`).
+- **CI** (`.github/workflows/ci.yml`): gofmt/vet/race tests, a GoReleaser snapshot build, the demo Action run (comments on PRs) and the landing-page job, which builds `site/` and requires 100% fidelity against `site/tokens.json`. Tagging `v*` runs `.github/workflows/release.yml`.
+- **Site:** Next.js static export in `site/`. It was never `npm install`ed on this machine; CI and Vercel build it. Check JSX locally with VS Code's bundled TypeScript (no install needed).
+- **Verified:** the CLI → server → Postgres round trip (local Postgres 16, queries on Neon).
+- **Vercel API access from Claude sessions** returned 403 for this account's team even after approval; the project was imported through the dashboard instead.
 
 ## Next up (owner's call on order)
 
-1. Push to GitHub and get CI green. Tag `v0.1.0`.
-2. Landing page. Inspiration: an airy sky hero with drifting clouds, a row of floating glass cards showing product output (fidelity score, token diff, PR comment, `npx`/install command), a lime accent, small monospace nav, and a bento feature grid. **Open question: daytime sky (as in the reference) or a night/astral version of the same layout?** Ask before building. Animate clouds with layered WebP + CSS transforms (cheap), respect `prefers-reduced-motion`, and pause when off-screen. Use no fake stats, testimonials or client logos. Host free on Vercel or GitHub Pages.
-3. Release binaries (GoReleaser via GitHub Actions, free) so people can install without Go.
-4. Optional AI "suggest the fix" step: provider-agnostic, OpenAI-compatible adapter (Groq free tier, OpenRouter `:free`, or local Ollama), bring-your-own key, off by default. The core stays deterministic.
+Done: CI green and v0.1.0; landing page (daytime sky, live on Vercel); release binaries (v0.1.1).
+
+1. PR-only mode: compare each PR with the base branch's report (`--baseline`, `--fail-on-new`, Action `baseline: auto`). In progress.
+2. Point each finding at the CSS rule that set it (DevTools CSS domain: stylesheet + line), so PR comments name `checkout.css:42`.
+3. Fidelity badge for READMEs (Action writes a shields.io endpoint JSON).
+4. Optional AI "suggest the fix" step: provider-agnostic, OpenAI-compatible adapter (Groq free tier, OpenRouter `:free`, or local Ollama), bring-your-own key, off by default. The core stays deterministic. Best after item 2, so it can edit the exact rule.
 5. Figma: the Variables REST API is Enterprise-only, so read tokens from file nodes/styles instead, or tell users to export DTCG JSON.
 6. Deploy the history server free (e.g. Render or Koyeb free tier) and build a small history dashboard.

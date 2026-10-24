@@ -54,6 +54,15 @@ type Suggestion struct {
 	Distance float64 `json:"distance"` // ΔE for colors, px for lengths, weight units for weights
 }
 
+// Status says how a finding compares with a baseline scan (astrolabe check --baseline).
+type Status string
+
+const (
+	StatusNew       Status = "new"       // the value wasn't on this page in the baseline
+	StatusIncreased Status = "increased" // the value is on more elements than in the baseline
+	StatusExisting  Status = "existing"  // the value was already there
+)
+
 // Finding is one off-token value, aggregated across every element that uses it.
 type Finding struct {
 	Category    tokens.Category `json:"category"`
@@ -63,6 +72,10 @@ type Finding struct {
 	Properties  []string        `json:"properties"`
 	Selectors   []string        `json:"selectors"`
 	Nearest     *Suggestion     `json:"nearest,omitempty"`
+
+	// Set only when the report was compared with a baseline.
+	Status              Status `json:"status,omitempty"`
+	BaselineOccurrences int    `json:"baselineOccurrences,omitempty"`
 }
 
 // CategoryStats counts checks per category.
@@ -81,6 +94,7 @@ type Result struct {
 	Elements   int                                `json:"elements"`
 	Categories map[tokens.Category]*CategoryStats `json:"categories"`
 	Findings   []Finding                          `json:"findings"`
+	Fixed      []Finding                          `json:"fixed,omitempty"` // baseline findings no longer present
 }
 
 var propCategory = map[string]tokens.Category{

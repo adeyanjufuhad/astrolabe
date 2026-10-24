@@ -33,8 +33,21 @@ inputs:
   project:
     description: Project name for the history server. Defaults to the repository name.
     default: ""
+  baseline:
+    description: >-
+      Earlier JSON report to compare with, so the comment leads with the drift this change introduces.
+      "auto" downloads the report from the latest run of this workflow on the pull request's base branch
+      (needs `actions: read` and the workflow to also run on pushes to that branch); a file path uses that
+      report; "none" turns comparison off.
+    default: auto
+  fail-on-new:
+    description: Fail the job if the change adds an off-token value or uses an existing one on more elements. Needs a baseline.
+    default: "false"
+  artifact-name:
+    description: Name of the uploaded artifact (HTML and JSON report). "auto" baselines look for this name.
+    default: astrolabe-report
   github-token:
-    description: Token used to comment on the pull request.
+    description: Token used to comment on the pull request and to download the baseline report.
     default: ${{ github.token }}
 
 outputs:
@@ -45,7 +58,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@v7
       with:
         go-version: "1.24"
         cache: false
@@ -53,6 +66,39 @@ runs:
     - name: Build Astrolabe
       shell: bash
       run: cd "$GITHUB_ACTION_PATH" && go build -trimpath -o "$RUNNER_TEMP/astrolabe" ./cmd/astrolabe
+
+    - name: Find baseline report
+      id: baseline
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        ARTIFACT: ${{ inputs.artifact-name }}
+      run: |
+        case "$INPUT_BASELINE" in
+          none|"") exit 0 ;;
+          auto) ;;
+          *) echo "path=$INPUT_BASELINE" >> "$GITHUB_OUTPUT"; exit 0 ;;
+        esac
+        if [ -z "$GITHUB_BASE_REF" ]; then
+          echo "Not a pull request, so there is nothing to compare with."
+          exit 0
+        fi
+        # This workflow's file (".github/workflows/ci.yml@refs/pull/7/merge" -> "ci.yml").
+        workflow="${GITHUB_WORKFLOW_REF%@*}"
+        workflow="${workflow##*/}"
+        dir="$RUNNER_TEMP/astrolabe-baseline"
+        # The newest push run on the base branch that uploaded a JSON report.
+        for run in $(gh run list -R "$GITHUB_REPOSITORY" --workflow "$workflow" --branch "$GITHUB_BASE_REF" \
+                       --event push --limit 10 --json databaseId,status --jq '.[] | select(.status == "completed") | .databaseId'); do
+          rm -rf "$dir"
+          if gh run download "$run" -R "$GITHUB_REPOSITORY" -n "$ARTIFACT" -D "$dir" > /dev/null 2>&1 && [ -f "$dir/astrolabe.json" ]; then
+            echo "Comparing with the report from run $run on $GITHUB_BASE_REF."
+            echo "path=$dir/astrolabe.json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        done
+        echo "::notice title=Astrolabe::No baseline report found on $GITHUB_BASE_REF yet, so every off-token value is listed. Run this workflow on pushes to $GITHUB_BASE_REF to compare future pull requests."
 
     - name: Check pages
       id: check
@@ -65,6 +111,8 @@ runs:
         INPUT_VIEWPORT: ${{ inputs.viewport }}
         INPUT_SERVER: ${{ inputs.server }}
         INPUT_PROJECT: ${{ inputs.project }}
+        INPUT_FAIL_ON_NEW: ${{ inputs.fail-on-new }}
+        BASELINE: ${{ steps.baseline.outputs.path }}
         ASTROLABE_API_KEY: ${{ inputs.api-key }}
       run: |
         set +e
@@ -72,6 +120,12 @@ runs:
         out="$RUNNER_TEMP/astrolabe"
         args=(check "${URLS[@]}" --tokens "$INPUT_TOKENS" --viewport "$INPUT_VIEWPORT" --fail-under "$INPUT_FAIL_UNDER"
               --json "$out.json" --html "$out-report.html" --markdown "$out.md" --no-color)
+        if [ -n "$BASELINE" ]; then
+          args+=(--baseline "$BASELINE")
+          [ "$INPUT_FAIL_ON_NEW" = "true" ] && args+=(--fail-on-new)
+        elif [ "$INPUT_FAIL_ON_NEW" = "true" ]; then
+          echo "::warning title=Astrolabe::fail-on-new is set but there is no baseline to compare with, so it was skipped."
+        fi
         [ -n "$INPUT_IGNORE" ] && args+=(--ignore "$INPUT_IGNORE")
         [ -n "$INPUT_SERVER" ] && args+=(--upload "$INPUT_SERVER")
         [ -n "$INPUT_PROJECT" ] && args+=(--project "$INPUT_PROJECT")
@@ -82,12 +136,15 @@ runs:
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         exit 0 # report first, enforce the threshold in the last step
 
-    - name: Upload HTML report
+    # The JSON report doubles as the baseline for later pull requests.
+    - name: Upload report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
-        name: astrolabe-report
-        path: ${{ runner.temp }}/astrolabe-report.html
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ runner.temp }}/astrolabe-report.html
+          ${{ runner.temp }}/astrolabe.json
         if-no-files-found: ignore
 
     - name: Comment on pull request
@@ -96,11 +153,12 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         PR: ${{ github.event.pull_request.number }}
+        ARTIFACT: ${{ inputs.artifact-name }}
       run: |
         body="$RUNNER_TEMP/astrolabe.md"
         [ -f "$body" ] || exit 0
         echo "" >> "$body"
-        echo "<sub>[Full HTML report](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (artifact: astrolabe-report)</sub>" >> "$body"
+        echo "<sub>[Full HTML report](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (artifact: ${ARTIFACT})</sub>" >> "$body"
         # Update our previous comment instead of adding a new one on every push.
         id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
               --jq '.[] | select(.body | startswith("<!-- astrolabe-report -->")) | .id' | tail -n 1)
