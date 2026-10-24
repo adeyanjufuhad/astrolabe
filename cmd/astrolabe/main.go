@@ -103,6 +103,8 @@ type checkFlags struct {
 	apiKey      string
 	gitSHA      string
 	gitRef      string
+	baseline    string
+	failOnNew   bool
 }
 
 func runCheck(args []string) (int, error) {
@@ -115,6 +117,8 @@ func runCheck(args []string) (int, error) {
 	fs.StringVar(&f.htmlOut, "html", "", "also write an HTML report to this file")
 	fs.StringVar(&f.mdOut, "markdown", "", "also write a Markdown report to this file")
 	fs.Float64Var(&f.failUnder, "fail-under", 0, "exit with status 1 if fidelity is below this percentage")
+	fs.StringVar(&f.baseline, "baseline", "", "JSON report of an earlier scan (e.g. the base branch) to compare with: findings are marked new, increased or existing")
+	fs.BoolVar(&f.failOnNew, "fail-on-new", false, "exit with status 1 if any off-token value is new or used more than in --baseline")
 	fs.StringVar(&f.ignore, "ignore", "", "comma-separated CSS selectors to skip (e.g. \".ads,#cookie-banner\")")
 	fs.StringVar(&f.viewport, "viewport", "1280x800", "viewport size WIDTHxHEIGHT")
 	fs.DurationVar(&f.wait, "wait", 500*time.Millisecond, "extra time to wait after the page loads")
@@ -153,6 +157,22 @@ func runCheck(args []string) (int, error) {
 	case "text", "json", "markdown", "md", "html":
 	default:
 		return 2, fmt.Errorf("unknown --format %q (use text, json, markdown or html)", f.format)
+	}
+
+	if f.failOnNew && f.baseline == "" {
+		return 2, errors.New("--fail-on-new needs --baseline")
+	}
+	var base *report.Report
+	if f.baseline != "" {
+		file, err := os.Open(f.baseline)
+		if err != nil {
+			return 2, err
+		}
+		base, err = report.ReadJSON(file)
+		file.Close()
+		if err != nil {
+			return 2, err
+		}
 	}
 
 	tokPath, err := findTokens(f.tokens)
@@ -201,6 +221,9 @@ func runCheck(args []string) (int, error) {
 
 	rep := report.New(currentVersion(), filepath.ToSlash(tokPath), set, pages)
 	rep.GitSHA, rep.GitRef = shortSHA(f.gitSHA), f.gitRef
+	if base != nil {
+		rep.Compare(base, filepath.ToSlash(f.baseline))
+	}
 
 	if err := writeOutputs(rep, f); err != nil {
 		return 2, err
@@ -216,11 +239,16 @@ func runCheck(args []string) (int, error) {
 			fmt.Fprintf(os.Stderr, "Saved scan to %s (project %q)\n", f.upload, project)
 		}
 	}
+	code := 0
 	if f.failUnder > 0 && rep.Score < f.failUnder {
 		fmt.Fprintf(os.Stderr, "Fidelity %.1f%% is below --fail-under %.1f%%\n", rep.Score, f.failUnder)
-		return 1, nil
+		code = 1
 	}
-	return 0, nil
+	if f.failOnNew && rep.Introduced() > 0 {
+		fmt.Fprintf(os.Stderr, "%d off-token value(s) are new or used more than in the baseline (--fail-on-new)\n", rep.Introduced())
+		code = 1
+	}
+	return code, nil
 }
 
 func writeOutputs(rep *report.Report, f checkFlags) error {

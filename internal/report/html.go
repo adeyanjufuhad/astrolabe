@@ -37,7 +37,18 @@ var tmpl = template.Must(template.New("report").Funcs(template.FuncMap{
 		return "bad"
 	},
 	"nearMiss": func(s drift.Severity) bool { return s == drift.NearMiss },
-	"more":     func(f drift.Finding) int { return f.Occurrences - 1 },
+	"baseName": baselineName,
+	// changeLabel is "new" or "×1→3" for findings this change introduced, "" otherwise.
+	"changeLabel": func(f drift.Finding) string {
+		switch f.Status {
+		case drift.StatusNew:
+			return "new"
+		case drift.StatusIncreased:
+			return fmt.Sprintf("×%d→%d", f.BaselineOccurrences, f.Occurrences)
+		}
+		return ""
+	},
+	"more": func(f drift.Finding) int { return f.Occurrences - 1 },
 	"countSev": func(fs []drift.Finding, s string) int {
 		n := 0
 		for _, f := range fs {

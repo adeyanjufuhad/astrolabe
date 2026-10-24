@@ -38,9 +38,9 @@ const YAML = `<span class="kk">on</span>: pull_request
   <span class="kk">astrolabe</span>:
     <span class="kk">runs-on</span>: ubuntu-latest
     <span class="kk">steps</span>:
-      - <span class="kk">uses</span>: actions/checkout@v4
+      - <span class="kk">uses</span>: actions/checkout@v7
       <span class="c"># …start your app or wait for a preview deploy…</span>
-      - <span class="kk">uses</span>: <span class="s">adeyanjufuhad/astrolabe@v0.1.0</span>
+      - <span class="kk">uses</span>: <span class="s">adeyanjufuhad/astrolabe@v0.1.1</span>
         <span class="kk">with</span>:
           <span class="kk">urls</span>: http://localhost:3000
           <span class="kk">tokens</span>: tokens.json
