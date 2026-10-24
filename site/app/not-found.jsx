@@ -16,8 +16,8 @@ export default function NotFound() {
               <Arrow />
             </span>
           </a>
-          <a className="btn btn-line" href="https://github.com/adeyanjufuhad/astrolabe">
-            GitHub
+          <a className="btn btn-line" href="/docs">
+            Read the docs
           </a>
         </div>
       </div>
