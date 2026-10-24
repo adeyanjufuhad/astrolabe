@@ -376,6 +376,8 @@ section { position: relative; }
 .gh th, .gh td { text-align: left; padding: var(--s1) var(--s2); border: 1px solid var(--line); }
 .gh th { background-color: var(--mist); font-weight: 600; }
 .gh td code { padding: 0 var(--s0); font-size: var(--t-2xs); }
+.gh-body .gh-fixed { margin-top: var(--s4); }
+.gh-body .gh-fold { margin-top: var(--s2); font-family: var(--mono); font-size: var(--t-xs); color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s5); }
 .chips span { padding: var(--s0) var(--s3); border-radius: var(--r-pill); background-color: var(--mist); font-family: var(--mono); font-size: var(--t-2xs); color: var(--ink-2); }
 .codes { display: grid; gap: var(--s1); margin-top: var(--s5); font-family: var(--mono); font-size: var(--t-xs); }

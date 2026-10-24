@@ -74,7 +74,7 @@ action.yml                composite GitHub Action (builds the CLI, comments on P
 
 Done: CI green and v0.1.0; landing page (daytime sky, live on Vercel); release binaries (v0.1.1).
 
-1. PR-only mode: compare each PR with the base branch's report (`--baseline`, `--fail-on-new`, Action `baseline: auto`). In progress.
+1. ~~PR-only mode~~: done in v0.2.0 (`--baseline`, `--fail-on-new`, Action `baseline: auto`), verified end to end on a test PR.
 2. Point each finding at the CSS rule that set it (DevTools CSS domain: stylesheet + line), so PR comments name `checkout.css:42`.
 3. Fidelity badge for READMEs (Action writes a shields.io endpoint JSON).
 4. Optional AI "suggest the fix" step: provider-agnostic, OpenAI-compatible adapter (Groq free tier, OpenRouter `:free`, or local Ollama), bring-your-own key, off by default. The core stays deterministic. Best after item 2, so it can edit the exact rule.
