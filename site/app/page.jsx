@@ -1,6 +1,7 @@
 import Clouds from "../components/Clouds";
 import CopyButton from "../components/CopyButton";
 import Counter from "../components/Counter";
+import Footer from "../components/Footer";
 import Dial from "../components/Dial";
 import Hero from "../components/Hero";
 import MotionToggle from "../components/MotionToggle";
@@ -429,7 +430,7 @@ export default function Page() {
                   note={
                     <>
                       Grab a{" "}
-                      <a href={`${REPO}/releases/latest`} style={{ textDecoration: "underline" }}>
+                      <a href="/docs/install" style={{ textDecoration: "underline" }}>
                         prebuilt binary
                       </a>{" "}
                       for Linux, macOS or Windows, or build it with Go 1.24 or newer.
@@ -481,7 +482,7 @@ export default function Page() {
             Hold your UI to its tokens. <span className="soft">Every pixel, every pull request.</span>
           </Reveal>
           <div className="hero-cta">
-            <a className="btn btn-glass" href={`${REPO}#readme`}>
+            <a className="btn btn-glass" href="/docs">
               Read the docs
             </a>
             <a className="btn btn-lime" href={REPO}>
@@ -494,26 +495,7 @@ export default function Page() {
         </section>
       </main>
 
-      <footer>
-        <div className="container foot">
-          <a className="brand" href="#top" translate="no">
-            <Logo />
-            Astrolabe
-          </a>
-          <nav aria-label="Footer">
-            <a href={REPO}>GitHub</a>
-            <a href={`${REPO}#readme`}>Docs</a>
-            <a href={`${REPO}/blob/main/action.yml`}>Action</a>
-            <a href={`${REPO}/blob/main/LICENSE`}>MIT License</a>
-          </nav>
-          <small>
-            v0.1.0 · Interactions adapted from{" "}
-            <a href="https://reactbits.dev" style={{ textDecoration: "underline" }}>
-              React Bits
-            </a>
-          </small>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

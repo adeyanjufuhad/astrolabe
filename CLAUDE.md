@@ -52,7 +52,8 @@ action.yml                composite GitHub Action (builds the CLI, comments on P
 - Fonts are Inter Tight and JetBrains Mono, pinned in `site/tokens.json`. Ignore the skills' Inter ban and font suggestions unless the owner changes the tokens.
 - The emoji in the PR-comment mock are Astrolabe's real output, so they stay.
 - No picsum or stock photos, fake numbers, testimonials or client logos, whatever the skills suggest about "organic data".
-- The centered hero with a fanned card row is the owner's chosen reference layout. Don't "fix" it into a split screen.
+- The centered hero with a curved, slowly turning card carousel is the owner's chosen reference layout. Don't "fix" it into a split screen.
+- Apart from the lime GitHub buttons, the site links to its own docs (`/docs`), never to GitHub pages. Download links to release files are the one exception.
 - Every value must be a token. CI runs Astrolabe on the built page with `--fail-under 100`.
 
 ## Neon

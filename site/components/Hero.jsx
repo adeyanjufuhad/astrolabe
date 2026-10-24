@@ -25,7 +25,6 @@ const PR_ROWS = [
   ["🟡 color", "#3b82f7"],
   ["🟡 spacing", "13px"],
   ["🔴 font-family", "arial"],
-  ["🔴 color", "#ea580c"],
 ];
 
 function Words({ words, offset = 0 }) {
@@ -39,13 +38,117 @@ function Words({ words, offset = 0 }) {
   ));
 }
 
-function Slot({ n, children }) {
+// One position on the 3D ring. The seven cards are rendered three times (21 slots) so
+// the turning ring never shows a gap; the copies are hidden from assistive tech.
+function Slot({ n, copy, children }) {
   return (
-    <div className={`card-slot c${n}`}>
-      <div className="bob" style={{ "--i": n - 1 }}>
-        {children}
-      </div>
+    <div className="ring-slot" style={{ "--i": n - 1 + copy * 7 }} aria-hidden={copy ? true : undefined}>
+      {children}
     </div>
+  );
+}
+
+// The cards on the carousel: every one shows real Astrolabe output.
+function CardSet({ go, copy }) {
+  return (
+    <>
+      <Slot copy={copy} n={1}>
+        <TiltCard className="glass">
+          <span className="k">token</span>
+          <div className="swatch demo" style={{ backgroundColor: "#3b82f6", marginTop: 10 }} />
+          <p className="mono" style={{ marginTop: 10, fontSize: 11 }}>
+            color.blue.500
+          </p>
+          <p className="k">#3b82f6</p>
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={2}>
+        <TiltCard className="glass">
+          <div className="pill-head">
+            <span>Fidelity</span>
+          </div>
+          <Ring value={94} delay={900} />
+          <p className="k" style={{ textAlign: "center" }}>
+            189 / 201 on-token
+          </p>
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={3}>
+        <TiltCard className="glass">
+          <span className="tag near">near-miss</span>
+          <div className="demo" style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <div className="swatch" style={{ backgroundColor: "#3b82f7" }} />
+            <div className="swatch" style={{ backgroundColor: "#3b82f6" }} />
+          </div>
+          <p className="mono" style={{ marginTop: 12, fontSize: 12 }}>
+            #3b82f7 → <b style={{ fontWeight: 500 }}>color.blue.500</b>
+          </p>
+          <p className="k">ΔE 0.1 · button.pay-button</p>
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={4}>
+        <TiltCard className="glass" style={{ textAlign: "center" }}>
+          <div className="plus">
+            <Icon name="terminal" size={22} />
+          </div>
+          <p style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-.02em" }}>One command</p>
+          <p className="k" style={{ marginTop: 4 }}>
+            any URL, localhost or HTML file
+          </p>
+          <div className="term-mini" translate="no">
+            <span className="p">$</span> astrolabe check localhost:3000
+          </div>
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={5}>
+        <TiltCard className="glass dark">
+          <p style={{ fontSize: 13, fontWeight: 600 }}>🔭 Astrolabe · fidelity 94%</p>
+          <p className="k" style={{ marginTop: 4, marginBottom: 8 }}>
+            PR comment · updated on push
+          </p>
+          {PR_ROWS.map(([k, v]) => (
+            <div key={k + v} className="pr-row">
+              <span>{k}</span>
+              <span>{v}</span>
+            </div>
+          ))}
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={6}>
+        <TiltCard className="glass">
+          <span className="k">by category</span>
+          <div className={go ? "bars go" : "bars"}>
+            {BARS.map(([name, v, lo], i) => (
+              <div key={name} className="row">
+                <span>{name}</span>
+                <div className="track">
+                  <div className={lo ? "fill lo" : "fill"} style={{ "--w": v + "%", "--i": i }} />
+                </div>
+                <span className="v">{v}</span>
+              </div>
+            ))}
+          </div>
+        </TiltCard>
+      </Slot>
+
+      <Slot copy={copy} n={7}>
+        <TiltCard className="glass">
+          <span className="tag off">off-system</span>
+          <p style={{ marginTop: 12, fontSize: 18 }} className="strike">
+            arial
+          </p>
+          <p style={{ fontSize: 18, fontWeight: 500 }}>Inter</p>
+          <p className="k" style={{ marginTop: 4 }}>
+            font.family.sans
+          </p>
+        </TiltCard>
+      </Slot>
+    </>
   );
 }
 
@@ -58,7 +161,7 @@ export default function Hero() {
     return () => clearTimeout(t);
   }, []);
 
-  // Parallax: the pointer tilts the card fan, scroll and pointer move the cloud layers.
+  // Parallax: the pointer tilts the carousel, scroll and pointer move the cloud layers.
   useEffect(() => {
     if (prefersReduced()) return;
     const hero = ref.current;
@@ -144,104 +247,13 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="fan-wrap" aria-label="Examples of Astrolabe output">
-        <div className="fan">
-          <Slot n={1}>
-            <TiltCard className="glass">
-              <span className="k">token</span>
-              <div className="swatch demo" style={{ backgroundColor: "#3b82f6", marginTop: 10 }} />
-              <p className="mono" style={{ marginTop: 10, fontSize: 11 }}>
-                color.blue.500
-              </p>
-              <p className="k">#3b82f6</p>
-            </TiltCard>
-          </Slot>
-
-          <Slot n={2}>
-            <TiltCard className="glass">
-              <div className="pill-head">
-                <span>Fidelity</span>
-              </div>
-              <Ring value={94} delay={900} />
-              <p className="k" style={{ textAlign: "center" }}>
-                189 / 201 on-token
-              </p>
-            </TiltCard>
-          </Slot>
-
-          <Slot n={3}>
-            <TiltCard className="glass">
-              <span className="tag near">near-miss</span>
-              <div className="demo" style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                <div className="swatch" style={{ backgroundColor: "#3b82f7" }} />
-                <div className="swatch" style={{ backgroundColor: "#3b82f6" }} />
-              </div>
-              <p className="mono" style={{ marginTop: 12, fontSize: 12 }}>
-                #3b82f7 → <b style={{ fontWeight: 500 }}>color.blue.500</b>
-              </p>
-              <p className="k">ΔE 0.1 · button.pay-button</p>
-            </TiltCard>
-          </Slot>
-
-          <Slot n={4}>
-            <TiltCard className="glass" style={{ textAlign: "center" }}>
-              <div className="plus">
-                <Icon name="terminal" size={22} />
-              </div>
-              <p style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-.02em" }}>One command</p>
-              <p className="k" style={{ marginTop: 4 }}>
-                any URL, localhost or HTML file
-              </p>
-              <div className="term-mini" translate="no">
-                <span className="p">$</span> astrolabe check localhost:3000
-              </div>
-            </TiltCard>
-          </Slot>
-
-          <Slot n={5}>
-            <TiltCard className="glass dark">
-              <p style={{ fontSize: 13, fontWeight: 600 }}>🔭 Astrolabe · fidelity 94%</p>
-              <p className="k" style={{ marginTop: 4, marginBottom: 8 }}>
-                PR comment · updated on push
-              </p>
-              {PR_ROWS.map(([k, v]) => (
-                <div key={k + v} className="pr-row">
-                  <span>{k}</span>
-                  <span>{v}</span>
-                </div>
-              ))}
-            </TiltCard>
-          </Slot>
-
-          <Slot n={6}>
-            <TiltCard className="glass">
-              <span className="k">by category</span>
-              <div className={go ? "bars go" : "bars"}>
-                {BARS.map(([name, v, lo], i) => (
-                  <div key={name} className="row">
-                    <span>{name}</span>
-                    <div className="track">
-                      <div className={lo ? "fill lo" : "fill"} style={{ "--w": v + "%", "--i": i }} />
-                    </div>
-                    <span className="v">{v}</span>
-                  </div>
-                ))}
-              </div>
-            </TiltCard>
-          </Slot>
-
-          <Slot n={7}>
-            <TiltCard className="glass">
-              <span className="tag off">off-system</span>
-              <p style={{ marginTop: 12, fontSize: 18 }} className="strike">
-                arial
-              </p>
-              <p style={{ fontSize: 18, fontWeight: 500 }}>Inter</p>
-              <p className="k" style={{ marginTop: 4 }}>
-                font.family.sans
-              </p>
-            </TiltCard>
-          </Slot>
+      <div className="carousel-wrap">
+        <div className="carousel" aria-label="Examples of Astrolabe output">
+          <div className="carousel-ring">
+            <CardSet go={go} copy={0} />
+            <CardSet go={go} copy={1} />
+            <CardSet go={go} copy={2} />
+          </div>
         </div>
       </div>
 

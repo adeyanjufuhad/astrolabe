@@ -85,7 +85,14 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 --directory site/out > /dev/null 2>&1 &
           for i in $(seq 20); do curl -sf http://127.0.0.1:8765/ > /dev/null && break; sleep 0.5; done
+      # The home page and every docs page (static export: /docs/install -> docs/install.html).
+      - name: List pages
+        run: |
+          pages="http://127.0.0.1:8765/"
+          for f in $(cd site/out && find docs.html docs -name '*.html' | sort); do pages="$pages http://127.0.0.1:8765/$f"; done
+          echo "PAGES=$pages" >> "$GITHUB_ENV"
+          echo "$pages" | tr ' ' '\n'
       - name: Check desktop
-        run: go run ./cmd/astrolabe check http://127.0.0.1:8765/ --tokens site/tokens.json --ignore .demo --wait 1500ms --fail-under 100
+        run: go run ./cmd/astrolabe check $PAGES --tokens site/tokens.json --ignore .demo --wait 1500ms --fail-under 100
       - name: Check mobile
-        run: go run ./cmd/astrolabe check http://127.0.0.1:8765/ --tokens site/tokens.json --ignore .demo --wait 1500ms --fail-under 100 --viewport 390x844
+        run: go run ./cmd/astrolabe check $PAGES --tokens site/tokens.json --ignore .demo --wait 1500ms --fail-under 100 --viewport 390x844

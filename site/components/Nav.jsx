@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { Arrow, Logo } from "./Icons";
 
 const LINKS = [
-  ["#how", "How it works"],
-  ["#try", "Try it"],
-  ["#features", "Features"],
-  ["#start", "Get started"],
+  ["/#how", "How it works"],
+  ["/#try", "Try it"],
+  ["/#features", "Features"],
+  ["/docs", "Docs"],
 ];
 
-// Fixed nav that turns to glass once the hero scrolls under it.
-export default function Nav() {
+// Fixed nav that turns to glass once the hero scrolls under it. On pages
+// without the sky hero (the docs) it starts in its glass state.
+export default function Nav({ solid = false }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -21,9 +22,9 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className={scrolled ? "nav scrolled" : "nav"}>
+    <header className={solid || scrolled ? "nav scrolled" : "nav"}>
       <div className="nav-inner">
-        <a className="brand" href="#top" aria-label="Astrolabe home" translate="no">
+        <a className="brand" href="/" aria-label="Astrolabe home" translate="no">
           <Logo />
           Astrolabe
         </a>
