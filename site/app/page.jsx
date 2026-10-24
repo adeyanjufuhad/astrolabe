@@ -32,19 +32,24 @@ const MARQUEE = [
   ["Postgres · Neon", <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3" /></>],
 ];
 
-const YAML = `<span class="kk">on</span>: pull_request
-<span class="kk">permissions</span>: { <span class="kk">contents</span>: read, <span class="kk">pull-requests</span>: write }
+const YAML = `<span class="kk">on</span>:
+  <span class="kk">pull_request</span>:
+  <span class="kk">push</span>: { <span class="kk">branches</span>: [main] } <span class="c"># main's scan is the baseline</span>
+<span class="kk">permissions</span>:
+  <span class="kk">contents</span>: read
+  <span class="kk">pull-requests</span>: write
+  <span class="kk">actions</span>: read
 <span class="kk">jobs</span>:
   <span class="kk">astrolabe</span>:
     <span class="kk">runs-on</span>: ubuntu-latest
     <span class="kk">steps</span>:
       - <span class="kk">uses</span>: actions/checkout@v7
       <span class="c"># …start your app or wait for a preview deploy…</span>
-      - <span class="kk">uses</span>: <span class="s">adeyanjufuhad/astrolabe@v0.1.1</span>
+      - <span class="kk">uses</span>: <span class="s">adeyanjufuhad/astrolabe@v0.2.0</span>
         <span class="kk">with</span>:
           <span class="kk">urls</span>: http://localhost:3000
           <span class="kk">tokens</span>: tokens.json
-          <span class="kk">fail-under</span>: 90`;
+          <span class="kk">fail-on-new</span>: true`;
 
 function MarqueeItems({ dup }) {
   return MARQUEE.map(([label, icon]) => (
@@ -258,8 +263,13 @@ export default function Page() {
                 <span className="ico">
                   <Icon name="branch" />
                 </span>
-                <h3>A comment on every pull request</h3>
-                <p>The GitHub Action posts one summary and updates it on every push. The full HTML report is uploaded as a build artifact.</p>
+                <h3>Only what each pull request adds</h3>
+                <p>
+                  Every pull request is compared with the latest scan of <code>main</code>. The comment leads with the drift this change
+                  introduces, credits what it fixed, and folds away what was already there, so you can adopt Astrolabe without
+                  fixing the backlog first.
+                </p>
+                {/* The comment Astrolabe actually posted on a test pull request. */}
                 <div className="gh">
                   <div className="gh-head">
                     <span className="av">
@@ -268,14 +278,15 @@ export default function Page() {
                     <b>github-actions</b> commented
                   </div>
                   <div className="gh-body">
-                    <h4>🔭 Astrolabe · fidelity 94%</h4>
+                    <h4>🔭 Astrolabe · fidelity 92.7% (−1.3 pts vs main@ae398b3)</h4>
                     <p>
-                      189 of 201 style values use a design token · <b>7 off-token values</b>
+                      <b>1 new off-token value</b> in this change · 1 fixed · 6 already there
                     </p>
                     <table>
                       <thead>
                         <tr>
                           <th />
+                          <th>Change</th>
                           <th>Value</th>
                           <th>Used</th>
                           <th>Nearest token</th>
@@ -283,37 +294,24 @@ export default function Page() {
                       </thead>
                       <tbody>
                         <tr>
-                          <td>🟡 color</td>
+                          <td>🔴 color</td>
                           <td>
-                            <code>#3b82f7</code> background-color
+                            <b>new</b>
+                          </td>
+                          <td>
+                            <code>#7c3aed</code> border-color
                           </td>
                           <td>×1</td>
                           <td>
-                            <code>color.blue.500</code> (#3b82f6)
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>🟡 spacing</td>
-                          <td>
-                            <code>13px</code> padding
-                          </td>
-                          <td>×1</td>
-                          <td>
-                            <code>space.3</code> (12px)
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>🔴 font-family</td>
-                          <td>
-                            <code>arial</code> font-family
-                          </td>
-                          <td>×1</td>
-                          <td>
-                            <code>font.family.sans</code> (inter)
+                            <code>color.blue.600</code> (#2563eb)
                           </td>
                         </tr>
                       </tbody>
                     </table>
+                    <p className="gh-fixed">
+                      ✅ Fixed: <code>#ea580c</code> color
+                    </p>
+                    <p className="gh-fold">▸ 6 off-token values already on the base branch</p>
                   </div>
                 </div>
                 <Edge />
@@ -372,14 +370,15 @@ export default function Page() {
                 </span>
                 <h3>A gate for CI</h3>
                 <p>
-                  Fail the build below a fidelity threshold with <code style={{ backgroundColor: "var(--glass)" }}>--fail-under 95</code>.
+                  Fail only when a change adds drift with <code style={{ backgroundColor: "var(--glass)" }}>--fail-on-new</code>, or
+                  below a threshold with <code style={{ backgroundColor: "var(--glass)" }}>--fail-under 95</code>.
                 </p>
                 <div className="codes">
                   <div>
                     <b>0</b>OK
                   </div>
                   <div>
-                    <b>1</b>below threshold
+                    <b>1</b>new drift or below threshold
                   </div>
                   <div>
                     <b>2</b>error
@@ -452,7 +451,7 @@ export default function Page() {
                     <CopyButton text={CHECK} />
                   </div>
                 </CmdCard>
-                <CmdCard n="3" title="Guard every pull request" note="Add the Action. It comments the score and fails below your threshold.">
+                <CmdCard n="3" title="Guard every pull request" note="Add the Action. It compares each pull request with main and can fail on just the drift it adds.">
                   {/* Static, trusted snippet with syntax-highlight spans. */}
                   <pre className="yaml" translate="no" dangerouslySetInnerHTML={{ __html: YAML }} />
                 </CmdCard>
